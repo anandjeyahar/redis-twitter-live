@@ -6,7 +6,7 @@ import twitter
 import requests
 from tornado.options import define, options
 from tornado.web import RequestHandler, Application
-
+import json
 
 define('debug', default=1, help='hot deployment. use in dev only', type=int)
 define('port', default=8888, help='run on the given port', type=int)
@@ -22,34 +22,34 @@ TEMPLATE = """
     <span class="twitter-relative-created-at"><a href="http://twitter.com/%s/statuses/%s">Posted %s</a></span>
     </div>
   """
-REDIS_TWEETS = 'tagos:tweets'
+REDIS_TWEETS = 'tagos:tweets:'
+EXPIRY = 7*24*3600
 
 def formatTweet(tweet):
-    xhtml = TEMPLATE % (s.user.screen_name, s.text, s.user.screen_name, s.id, s.relative_created_at)
+    xhtml = TEMPLATE % (tweet.user.screen_name, tweet.text, tweet.user.screen_name, tweet.id, tweet.relative_created_at)
     return xhtml
 
 def fetchTwitter(user):
     assert user
     timelineUrl = 'https://api.twitter.com/1.1/statuses/user_timeline.json'
     statuses = config.api.GetUserTimeline(screen_name=user, count=5, since_id=0)
-    import pdb; pdb.set_trace()
-    for status in statuses:
-        config.redisLabsConn.zadd(REDIS_TWEETS, float(status.id), status.text)
+    latestTweet = max(statuses, key=lambda k: k.id)
+    config.redisLabsConn.setex(REDIS_TWEETS+user, formatTweet(latestTweet), EXPIRY)
     if len(statuses):
         s = statuses[0]
     return formatTweet(s)
 
-def fetchTweets(user):
+def fetchTweets(user, live=False):
     assert user
-    latestTweet = config.redisLabsConn.zrevrange(REDIS_TWEETS, 0, 1)
+    latestTweet = config.redisLabsConn.get(REDIS_TWEETS+user) if not live else None
     if latestTweet: # and latestTweet[0].relative_created_at:
-        return formatTweet(latestTweet)
+        return latestTweet[0]
     else:
         return fetchTwitter(user)
 
 class LatestTweetHandler(RequestHandler):
-    def get(self, twitterHandle='softwarmechanic'):
-        return fetchTweets(twitterHandle)
+    def get(self, twitterHandle='@GautamGambhir', live=False):
+        self.write(fetchTweets(twitterHandle, live))
 
 class Application(Application):
     def __init__(self):
@@ -61,7 +61,6 @@ class Application(Application):
             debug=options.debug,
             gzip=True,
             xheaders=True,
-
             )
         tornado.web.Application.__init__(self, handlers, **settings)
 

@@ -1,7 +1,7 @@
 import redis
 import twitter
 
-redisLabsConn = redis.Redis(host='pub-redis-19836.us-east-1-2.5.ec2.garantiadata.com',
+redisLabsConn = redis.StrictRedis(host='pub-redis-19836.us-east-1-2.5.ec2.garantiadata.com',
                             port='19836',
                             db=0,
                             password='tagosTweets')
