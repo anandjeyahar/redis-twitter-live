@@ -1,0 +1,4 @@
+    1. run pip install -r requirements.txt
+    2. Run with python serve.py --port=<preferred port>
+    3. Query with http://localhost:<port>/<twitterhandle>
+

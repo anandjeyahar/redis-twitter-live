@@ -34,7 +34,7 @@ def fetchTwitter(user):
     timelineUrl = 'https://api.twitter.com/1.1/statuses/user_timeline.json'
     statuses = config.api.GetUserTimeline(screen_name=user, count=5, since_id=0)
     latestTweet = max(statuses, key=lambda k: k.id)
-    config.redisLabsConn.setex(REDIS_TWEETS+user, formatTweet(latestTweet), EXPIRY)
+    config.redisLabsConn.setex(REDIS_TWEETS+user, EXPIRY, formatTweet(latestTweet))
     if len(statuses):
         s = statuses[0]
     return formatTweet(s)
@@ -54,7 +54,7 @@ class LatestTweetHandler(RequestHandler):
 class Application(Application):
     def __init__(self):
         handlers = [
-                (r'/', LatestTweetHandler),
+                (r'/([^/]+)', LatestTweetHandler),
                 ]
         settings = dict(
             autoescape=None,  # tornado 2.1 backward compatibility
