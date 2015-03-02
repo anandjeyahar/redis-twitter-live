@@ -34,7 +34,7 @@ def fetchTwitter(user):
     statuses = config.api.GetUserTimeline(screen_name=user, count=5, since_id=0)
     import pdb; pdb.set_trace()
     for status in statuses:
-        config.redisLabsConn.zadd(REDIS_TWEETS, status.id, status.text)
+        config.redisLabsConn.zadd(REDIS_TWEETS, float(status.id), status.text)
     if len(statuses):
         s = statuses[0]
     return formatTweet(s)
