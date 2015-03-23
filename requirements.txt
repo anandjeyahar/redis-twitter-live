@@ -1,4 +1,4 @@
 tornado
 requests
 redis
-twitter
+twitter==2.2
