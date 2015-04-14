@@ -43,13 +43,13 @@ def fetchTweets(user, live=False):
     assert user
     latestTweet = config.redisLabsConn.get(REDIS_TWEETS+user) if not live else None
     if latestTweet: # and latestTweet[0].relative_created_at:
-        return latestTweet[0]
+        return latestTweet
     else:
         return fetchTwitter(user)
 
 class LatestTweetHandler(RequestHandler):
-    def get(self, twitterHandle='@GautamGambhir', live=False):
-        self.write(fetchTweets(twitterHandle, live))
+    def post(self, twitterHandle='@GautamGambhir', live=False):
+        self.finish(json.dumps({'tweet': fetchTweets(twitterHandle, live)}))
 
 class Application(Application):
     def __init__(self):
