@@ -9,7 +9,7 @@ from tornado.web import RequestHandler, Application
 import json
 
 define('debug', default=1, help='hot deployment. use in dev only', type=int)
-define('port', default=80, help='run on the given port', type=int)
+define('port', default=8889, help='run on the given port', type=int)
 
 
 # get latest tweets of a user examples
