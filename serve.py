@@ -16,6 +16,10 @@ define('port', default=8889, help='run on the given port', type=int)
 # taken from
 # https://github.com/bear/python-twitter/blob/master/examples/twitter-to-xhtml.py.
 
+redistogo_url = os.getenv('REDISTOGO_URL')
+assert redistogo_url, 'No redis To Go URL set'
+redisToGoConn = redis.from_url(redistogo_url)
+
 TEMPLATE = """
     <div class="twitter">
     <span class="twitter-user"><a href="http://twitter.com/%s">Twitter</a>: </span>
@@ -23,7 +27,7 @@ TEMPLATE = """
     <span class="twitter-relative-created-at"><a href="http://twitter.com/%s/statuses/%s">Posted %s</a></span>
     </div>
   """
-REDIS_TWEETS = 'tagos:tweets:'
+REDIS_TWEETS = 'redis:tweets:'
 EXPIRY = 7 * 24 * 3600
 
 
@@ -39,7 +43,7 @@ def fetchTwitter(user):
     statuses = config.api.GetUserTimeline(
         screen_name=user, count=5, since_id=0)
     latestTweet = max(statuses, key=lambda k: k.id)
-    config.redisLabsConn.setex(REDIS_TWEETS + user, EXPIRY,
+    redisToGoConn.setex(REDIS_TWEETS + user, EXPIRY,
                                formatTweet(latestTweet))
     if len(statuses):
         s = statuses[0]
