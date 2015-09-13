@@ -4,6 +4,7 @@ import tornado
 import tornado.httpserver
 import twitter
 import requests
+import redis
 from tornado.options import define, options
 from tornado.web import RequestHandler, Application
 import json
@@ -44,7 +45,7 @@ def fetchTwitter(user):
         screen_name=user, count=5, since_id=0)
     latestTweet = max(statuses, key=lambda k: k.id)
     redisToGoConn.setex(REDIS_TWEETS + user, EXPIRY,
-                               formatTweet(latestTweet))
+                        formatTweet(latestTweet))
     if len(statuses):
         s = statuses[0]
     return formatTweet(s)
