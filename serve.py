@@ -17,7 +17,7 @@ define('port', default=8889, help='run on the given port', type=int)
 # taken from
 # https://github.com/bear/python-twitter/blob/master/examples/twitter-to-xhtml.py.
 
-redistogo_url = os.getenv('REDISTOGO_URL')
+redistogo_url = 'redis://h:pfkigaokqsneefe62g118mcu29f@ec2-54-235-152-160.compute-1.amazonaws.com:9819'
 assert redistogo_url, 'No redis To Go URL set'
 redisToGoConn = redis.from_url(redistogo_url)
 
